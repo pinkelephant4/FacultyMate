@@ -5,6 +5,8 @@ if (process.env.NODE_ENV != "production") {
 }
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+// const path = require("path");
+// const archiver = require("archiver");
 
 module.exports.createUser = async (req, res) => {
   try {
@@ -23,7 +25,7 @@ module.exports.createUser = async (req, res) => {
       role,
     });
 
-    console.log("user created", user);
+    // console.log("user created", user);
     res.json({ message: "User registered successfully", user });
   } catch (error) {
     console.error("Error registering user:", error);
@@ -34,18 +36,22 @@ module.exports.getCredentials = async (req, res, next) => {
   try {
     const { email } = req.user;
     const credentials = await Upload.find({ email }).exec();
-    res.json({
-      message: "Credentials found",
-      credentials,
-    });
+    if (credentials.length === 0) {
+      res.json({
+        message: "No Credentials Uploaded yet",
+      });
+    } else {
+      res.json({
+        message: "Credentials found",
+        credentials,
+      });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 module.exports.createStuCredentials = async (req, res, next) => {
-  // console.log(req.body);
-  // console.log(req.files);
   try {
     const {
       //email, //where do i even get this from
@@ -62,7 +68,6 @@ module.exports.createStuCredentials = async (req, res, next) => {
     email = req.user.email;
     const uploadedFiles = [];
     req.files.forEach((f) => {
-      console.log(f.path);
       uploadedFiles.push(f.path);
     });
 
@@ -104,7 +109,6 @@ module.exports.createFacCredentials = async (req, res, next) => {
     email = req.user.email;
     const uploadedFiles = [];
     req.files.forEach((f) => {
-      console.log(f.path);
       uploadedFiles.push(f.path);
     });
 
@@ -168,7 +172,6 @@ module.exports.loginUser = async (req, res) => {
 };
 
 module.exports.checkAuth = (req, res) => {
-  console.log(req.user);
   res.status(200).json({ message: "success" });
 };
 
@@ -181,5 +184,41 @@ module.exports.logoutUser = async (req, res, next) => {
   res.status(200).json({ message: "Already Logged out" });
 };
 
-module.exports.dwdCredentials = async (req, res, next) => {};
-module.exports.dwdCurrCredential = async (req, res, next) => {};
+module.exports.dwdCredentials = async (req, res) => {
+  const { email } = req.user;
+  try {
+    const credentials = await Upload.find({ email });
+    if (credentials.length === 0) {
+      return res.status(404).json({ message: "No credentials found" });
+    }
+    const archive = archiver("zip");
+    res.attachment("credentials.zip");
+    archive.on("error", (err) => {
+      throw err;
+    });
+    archive.pipe(res);
+    credentials.forEach((cred) => {
+      let file = path.join(__dirname, "..", cred.files[0]);
+      archive.file(file, { name: path.basename(file) });
+    });
+    archive.finalize();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+module.exports.dwdCurrCredential = async (req, res) => {
+  const { email } = req.user;
+  try {
+    const credential = await Upload.findOne({ email });
+    if (!credential) {
+      return res.status(404).json({ message: "No current credential found" });
+    }
+    let file = path.join(__dirname, "..", credential.files[0]);
+    res.download(file);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

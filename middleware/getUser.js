@@ -7,7 +7,6 @@ const getUser = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.sub);
     req.user = user;
-    // console.log(req.user);
     next();
   } catch (error) {
     console.log(error);

@@ -11,11 +11,11 @@ if (process.env.NODE_ENV != "production") {
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     path = req.user._id; //change as needed
-
     try {
       if (!fs.existsSync(`./uploads/${path}`)) {
         fs.mkdirSync(`./uploads/${path}`);
         console.log("New Directory created successfully !!");
+        // console.log();
       }
     } catch (err) {
       console.error(err);
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
     return cb(null, `${Date.now()}-${file.originalname}`);
   },
 });
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
 const {
   createUser,
@@ -47,8 +47,8 @@ router.get("/logout", logoutUser);
 router.get("/check-auth", requireAuth, checkAuth);
 
 router.get("/getCredentials", getUser, getCredentials);
-// router.get("/dwdCredentials", dwdCredentials);
-// router.get("/dwdCurrCredential", dwdCurrCredential);
+// router.get("/dwdCredentials", requireAuth, dwdCredentials);
+// router.get("/dwdCurrCredential", requireAuth, dwdCurrCredential);
 
 router.post(
   "/createStuCredentials",
@@ -57,6 +57,7 @@ router.post(
   upload.array("studentFiles", (maxCount = process.env.MAX_FILES)), //multer middleware current maxcount set to 10 change when needed here.
   createStuCredentials
 );
+
 router.post(
   "/createFacCredentials",
   getUser,
