@@ -173,11 +173,13 @@ module.exports.checkAuth = (req, res) => {
 };
 
 module.exports.logoutUser = async (req, res, next) => {
-  res.clearCookie("token");
-  res.status(200).json({ message: "Logged out Successfully" });
+  const token = req.cookies.token;
+  if (token) {
+    res.clearCookie("token");
+    res.status(200).json({ message: "Logged out Successfully" });
+  }
+  res.status(200).json({ message: "Already Logged out" });
 };
 
-module.exports.dwdCredentials = async (req, res, next) => {
-  
-};
+module.exports.dwdCredentials = async (req, res, next) => {};
 module.exports.dwdCurrCredential = async (req, res, next) => {};
