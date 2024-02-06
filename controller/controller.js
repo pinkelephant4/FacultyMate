@@ -209,16 +209,27 @@ module.exports.dwdCredentials = async (req, res) => {
 };
 
 module.exports.dwdCurrCredential = async (req, res) => {
-  const { email } = req.user;
-  try {
-    const credential = await Upload.findOne({ email });
-    if (!credential) {
-      return res.status(404).json({ message: "No current credential found" });
-    }
-    let file = path.join(__dirname, "..", credential.files[0]);
-    res.download(file);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
-  }
+  // const { email } = req.user;
+  // try {
+  //   const credential = await Upload.findOne({ email });
+  //   if (!credential) {
+  //     return res.status(404).json({ message: "No current credential found" });
+  //   }
+  //   let file = path.join(__dirname, "..", credential.files[0]);
+  //   res.download(file);
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).json({ error: "Server error" });
+  // }
+
+  const cred_id = req._id; //change as required
+  const credential = await Upload.findById(cred_id);
+  res.download("", credential.Achievement_Title);
 };
+// dwd current
+// router.get('/:id/download', function (req, res, next) {
+//   var filePath = "/my/file/path/..."; // Or format the path using the `id` rest param
+//   var fileName = "report.pdf"; // The default name the browser will use
+
+//   res.download(filePath, fileName);
+// });
