@@ -47,8 +47,9 @@ router.get("/logout", logoutUser);
 router.get("/check-auth", requireAuth, checkAuth);
 
 router.get("/getCredentials", getUser, getCredentials);
-// router.get("/dwdCredentials", requireAuth, dwdCredentials);
-// router.get("/dwdCurrCredential", requireAuth, dwdCurrCredential);
+
+router.get("/dwdCredentials", getUser, dwdCredentials);
+// router.get("/dwdCurrCredential", getUser, dwdCurrCredential);
 
 router.post(
   "/createStuCredentials",
@@ -57,7 +58,6 @@ router.post(
   upload.array("studentFiles", (maxCount = process.env.MAX_FILES)), //multer middleware current maxcount set to 10 change when needed here.
   createStuCredentials
 );
-
 router.post(
   "/createFacCredentials",
   getUser,

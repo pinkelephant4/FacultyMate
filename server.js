@@ -5,11 +5,14 @@ const apiRoutes = require("./routes/routes");
 if (process.env.NODE_ENV != "production") {
   require("dotenv").config();
 }
+const zip = require("express-easy-zip");
+
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(zip());
 
 //connnect to DB
 connectDB();

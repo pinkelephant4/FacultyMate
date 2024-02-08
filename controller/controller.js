@@ -5,8 +5,7 @@ if (process.env.NODE_ENV != "production") {
 }
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-// const path = require("path");
-// const archiver = require("archiver");
+const path = require("path");
 
 module.exports.createUser = async (req, res) => {
   try {
@@ -185,23 +184,18 @@ module.exports.logoutUser = async (req, res, next) => {
 };
 
 module.exports.dwdCredentials = async (req, res) => {
-  const { email } = req.user;
+  const { _id } = req.user;
+  console.log(path.join(__dirname, `../uploads/${_id}/`));
   try {
-    const credentials = await Upload.find({ email });
-    if (credentials.length === 0) {
-      return res.status(404).json({ message: "No credentials found" });
-    }
-    const archive = archiver("zip");
-    res.attachment("credentials.zip");
-    archive.on("error", (err) => {
-      throw err;
+    res.zip({
+      files: [
+        {
+          path: path.join(__dirname, `../uploads/${_id}/`),
+          name: `${_id}`,
+        },
+      ],
+      filename: "credentials.zip",
     });
-    archive.pipe(res);
-    credentials.forEach((cred) => {
-      let file = path.join(__dirname, "..", cred.files[0]);
-      archive.file(file, { name: path.basename(file) });
-    });
-    archive.finalize();
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });
