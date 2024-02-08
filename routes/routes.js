@@ -49,7 +49,7 @@ router.get("/check-auth", requireAuth, checkAuth);
 router.get("/getCredentials", getUser, getCredentials);
 
 router.get("/dwdCredentials", getUser, dwdCredentials);
-// router.get("/dwdCurrCredential", getUser, dwdCurrCredential);
+router.get("/dwdCurrCredential", dwdCurrCredential);
 
 router.post(
   "/createStuCredentials",

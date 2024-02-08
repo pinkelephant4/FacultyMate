@@ -187,6 +187,10 @@ module.exports.dwdCredentials = async (req, res) => {
   const { _id } = req.user;
   console.log(path.join(__dirname, `../uploads/${_id}/`));
   try {
+    //for redirecting to diff page after
+    // res.set({
+    //   Location: "URL://for.redirection",
+    // });
     res.zip({
       files: [
         {
@@ -203,27 +207,28 @@ module.exports.dwdCredentials = async (req, res) => {
 };
 
 module.exports.dwdCurrCredential = async (req, res) => {
-  // const { email } = req.user;
-  // try {
-  //   const credential = await Upload.findOne({ email });
-  //   if (!credential) {
-  //     return res.status(404).json({ message: "No current credential found" });
-  //   }
-  //   let file = path.join(__dirname, "..", credential.files[0]);
-  //   res.download(file);
-  // } catch (error) {
-  //   console.error(error);
-  //   res.status(500).json({ error: "Server error" });
-  // }
+  const cred_id = req.body._id; //change as required
 
-  const cred_id = req._id; //change as required
-  const credential = await Upload.findById(cred_id);
-  res.download("", credential.Achievement_Title);
+  try {
+    const credential = await Upload.findById(cred_id);
+
+    let fileObjArray = [];
+    credential.files.forEach((file) => {
+      let splitStr = file.split("\\");
+      const name = splitStr[splitStr.length - 1];
+      let fileObj = {
+        path: path.join(__dirname, `../${file}`),
+        name: name,
+      };
+      fileObjArray.push(fileObj);
+    });
+
+    res.zip({
+      files: fileObjArray,
+      filename: `${credential.Achievement_Title}.zip`,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
-// dwd current
-// router.get('/:id/download', function (req, res, next) {
-//   var filePath = "/my/file/path/..."; // Or format the path using the `id` rest param
-//   var fileName = "report.pdf"; // The default name the browser will use
-
-//   res.download(filePath, fileName);
-// });
